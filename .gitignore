@@ -1,0 +1,15 @@
+
+# Playwright
+node_modules/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+QAEnd2EndPromptFile.md
+
+# OS and local environment
+.DS_Store
+
+# Allow committed test result summaries
+!/test-results/
+!test-results/*.md
