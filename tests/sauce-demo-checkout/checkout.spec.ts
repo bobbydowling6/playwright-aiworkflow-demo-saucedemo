@@ -1,10 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 
 const baseURL = 'https://www.saucedemo.com';
 const credentials = { username: 'standard_user', password: 'secret_sauce' };
 const validCheckout = { firstName: 'Test', lastName: 'User', postalCode: '12345' };
 
-async function login(page) {
+async function login(page: Page) {
   await page.goto(baseURL);
   await page.fill('#user-name', credentials.username);
   await page.fill('#password', credentials.password);
@@ -13,13 +13,13 @@ async function login(page) {
   await expect(page.locator('.inventory_list')).toBeVisible();
 }
 
-async function addFirstItemToCart(page) {
+async function addFirstItemToCart(page: Page) {
   const firstItem = page.locator('.inventory_item').first();
   await firstItem.getByRole('button', { name: 'Add to cart' }).click();
   await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
 }
 
-async function navigateToCart(page) {
+async function navigateToCart(page: Page) {
   await page.click('.shopping_cart_link');
   await expect(page).toHaveURL(/cart.html/);
   await expect(page.locator('.cart_list')).toBeVisible();
