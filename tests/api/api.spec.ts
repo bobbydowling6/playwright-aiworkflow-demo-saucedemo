@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { devices } from '@playwright/test';
 
 const baseURL = 'https://www.saucedemo.com';
 
 test.describe('SauceDemo API Tests', () => {
-  test.fixme('SauceDemo does not allow POST requests to / via APIRequestContext, returns 405 Method Not Allowed', async ({ request }) => {
+  test.fixme('Login API - valid credentials (blocked by site)', async ({ request }) => {
     const response = await request.post(`${baseURL}/`, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -30,7 +31,7 @@ test.describe('SauceDemo API Tests', () => {
     expect(response.url()).toContain('/inventory.html');
   });
 
-  test.fixme('SauceDemo does not allow POST requests to / via APIRequestContext, returns 405 Method Not Allowed', async ({ request }) => {
+  test.fixme('Login API - invalid credentials (blocked by site)', async ({ request }) => {
     const response = await request.post(`${baseURL}/`, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -58,8 +59,7 @@ test.describe('SauceDemo API Tests', () => {
     expect(body).toContain('Epic sadface');
   });
 
-  test.fixme('SauceDemo does not allow POST requests to / via APIRequestContext, returns 405 Method Not Allowed', async ({ request }) => {
-    // Login first
+  test.fixme('Checkout API flow (blocked by site)', async ({ request }) => {
     const loginResponse = await request.post(`${baseURL}/`, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
