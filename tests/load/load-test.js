@@ -9,15 +9,20 @@ export let options = {
 const baseURL = 'https://www.saucedemo.com';
 
 export default function () {
-  // Login
+  // Login with proper form encoding
   let response = http.post(baseURL, {
     'user-name': 'standard_user',
     'password': 'secret_sauce',
+  }, {
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
   });
 
   check(response, {
     'login status is 200': (r) => r.status === 200,
     'login redirects to inventory': (r) => r.url.includes('/inventory.html'),
+    'no error message': (r) => !r.body.includes('Epic sadface'),
   });
 
   sleep(1);
