@@ -1,97 +1,54 @@
 import { test, expect } from '@playwright/test';
-import { devices } from '@playwright/test';
 
 const baseURL = 'https://www.saucedemo.com';
 
-test.describe('SauceDemo API Tests', () => {
-  test.fixme('Login API - valid credentials (blocked by site)', async ({ request }) => {
-    const response = await request.post(`${baseURL}/`, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'same-origin',
-        'Sec-Fetch-User': '?1',
-        'Cache-Control': 'max-age=0',
-        'Referer': 'https://www.saucedemo.com/'
-      },
-      form: {
-        'user-name': 'standard_user',
-        'password': 'secret_sauce'
-      }
-    });
-
-    expect(response.status()).toBe(200);
-    expect(response.url()).toContain('/inventory.html');
+test.describe('SauceDemo Login Tests', () => {
+  test('Login UI - valid credentials', async ({ page }) => {
+    await page.goto(baseURL);
+    await page.fill('#user-name', 'standard_user');
+    await page.fill('#password', 'secret_sauce');
+    await page.click('#login-button');
+    await expect(page).toHaveURL(/inventory\.html$/);
   });
 
-  test.fixme('Login API - invalid credentials (blocked by site)', async ({ request }) => {
-    const response = await request.post(`${baseURL}/`, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'same-origin',
-        'Sec-Fetch-User': '?1',
-        'Cache-Control': 'max-age=0',
-        'Referer': 'https://www.saucedemo.com/'
-      },
-      form: {
-        'user-name': 'invalid_user',
-        'password': 'wrong_password'
-      }
-    });
-
-    expect(response.status()).toBe(200);
-    const body = await response.text();
-    expect(body).toContain('Epic sadface');
+  test('Login UI - invalid credentials', async ({ page }) => {
+    await page.goto(baseURL);
+    await page.fill('#user-name', 'invalid_user');
+    await page.fill('#password', 'wrong_password');
+    await page.click('#login-button');
+    await expect(page.locator('.error-message-container')).toContainText('Epic sadface');
   });
 
-  test.fixme('Checkout API flow (blocked by site)', async ({ request }) => {
-    const loginResponse = await request.post(`${baseURL}/`, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-        'Sec-Fetch-Dest': 'document',
-        'Sec-Fetch-Mode': 'navigate',
-        'Sec-Fetch-Site': 'same-origin',
-        'Sec-Fetch-User': '?1',
-        'Cache-Control': 'max-age=0',
-        'Referer': 'https://www.saucedemo.com/'
-      },
-      form: {
-        'user-name': 'standard_user',
-        'password': 'secret_sauce'
-      }
-    });
-    expect(loginResponse.status()).toBe(200);
+  test('Basic Checkout UI flow', async ({ page }) => {
+    // Login
+    await page.goto(baseURL);
+    await page.fill('#user-name', 'standard_user');
+    await page.fill('#password', 'secret_sauce');
+    await page.click('#login-button');
+    await expect(page).toHaveURL(/inventory\.html$/);
 
-    // Add item to cart (this might require session handling)
-    // Note: SauceDemo uses sessions, so this is simplified
-    const cartResponse = await request.post(`${baseURL}/inventory.html`, {
-      form: {
-        // Add to cart form data
-      }
-    });
+    // Add item to cart
+    await page.locator('.inventory_item').first().getByRole('button', { name: 'Add to cart' }).click();
+    await expect(page.locator('.shopping_cart_badge')).toHaveText('1');
 
-    // Checkout steps would follow similar pattern
-    // This is a basic structure - full implementation would need session cookies
+    // Go to cart
+    await page.click('.shopping_cart_link');
+    await expect(page).toHaveURL(/cart\.html$/);
+
+    // Checkout
+    await page.getByRole('button', { name: 'Checkout' }).click();
+    await expect(page).toHaveURL(/checkout-step-one\.html$/);
+
+    // Fill checkout info
+    await page.fill('#first-name', 'Test');
+    await page.fill('#last-name', 'User');
+    await page.fill('#postal-code', '12345');
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await expect(page).toHaveURL(/checkout-step-two\.html$/);
+
+    // Finish
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await expect(page).toHaveURL(/checkout-complete\.html$/);
+    await expect(page.locator('.complete-header')).toContainText('Thank you for your order!');
   });
 });
